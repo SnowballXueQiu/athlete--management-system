@@ -80,8 +80,35 @@ const fetchSummary = async () => {
   }
 }
 
-const handleExport = (type: string) => {
-  window.open(`/api/export/${type}`, '_blank')
+const handleExport = async (type: string) => {
+  try {
+    const res = await request.get(`/export/${type}`, {
+      responseType: 'blob'
+    })
+    
+    // Create blob link to download
+    const url = window.URL.createObjectURL(new Blob([res.data]))
+    const link = document.createElement('a')
+    link.href = url
+    
+    // Set filename based on type
+    const filenameMap: Record<string, string> = {
+      'students': '学员信息.xlsx',
+      'attendance': '考勤记录.xlsx',
+      'grades': '成绩记录.xlsx'
+    }
+    link.setAttribute('download', filenameMap[type] || 'export.xlsx')
+    
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+    
+    ElMessage.success('导出成功')
+  } catch (error) {
+    console.error('Export failed:', error)
+    ElMessage.error('导出失败')
+  }
 }
 
 onMounted(() => {

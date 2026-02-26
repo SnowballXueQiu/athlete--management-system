@@ -65,6 +65,12 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
+
+  // Set document title
+  document.title = to.meta.title
+    ? `${to.meta.title} - 运动员管理系统`
+    : "运动员管理系统";
+
   if (to.meta.requiresAuth && !authStore.token) {
     next("/login");
   } else {

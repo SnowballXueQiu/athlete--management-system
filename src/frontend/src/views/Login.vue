@@ -3,7 +3,7 @@
     <el-card class="login-card">
       <template #header>
         <div class="card-header">
-          <span>体育运动学员管理系统</span>
+          <span>运动员管理系统</span>
         </div>
       </template>
       <el-form :model="loginForm" :rules="rules" ref="loginFormRef" label-width="0px">
@@ -75,9 +75,11 @@ const handleLogin = async () => {
   background-color: #f0f2f5;
   background-image: linear-gradient(135deg, #409EFF 0%, #67C23A 100%);
 }
+
 .login-card {
   width: 400px;
 }
+
 .card-header {
   text-align: center;
   font-size: 20px;

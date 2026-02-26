@@ -30,7 +30,9 @@ service.interceptors.response.use(
       authStore.logout()
       location.reload()
     }
-    ElMessage.error(error.message || 'Error')
+    // Show detailed error message from backend if available
+    const errorMsg = error.response?.data || error.message || 'Error'
+    ElMessage.error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg))
     return Promise.reject(error)
   }
 )
