@@ -42,16 +42,8 @@ public class ExportController {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("学员信息");
         
-        Row header = sheet.createRow(0);
-        header.createCell(0).setCellValue("ID");
-        header.createCell(1).setCellValue("姓名");
-        header.createCell(2).setCellValue("性别");
-        header.createCell(3).setCellValue("年龄");
-        header.createCell(4).setCellValue("电话");
-        header.createCell(5).setCellValue("邮箱");
-        header.createCell(6).setCellValue("地址");
-        header.createCell(7).setCellValue("紧急联系人");
-        header.createCell(8).setCellValue("紧急电话");
+        String[] headers = {"ID", "姓名", "性别", "年龄", "电话", "邮箱", "地址", "紧急联系人", "紧急电话"};
+        createHeader(sheet, headers);
         
         int rowNum = 1;
         for (Student student : students) {
@@ -67,6 +59,8 @@ public class ExportController {
             row.createCell(8).setCellValue(student.getEmergencyPhone());
         }
         
+        autoSizeColumns(sheet, headers.length);
+        
         setResponseHeader(response, "学员信息.xlsx");
         workbook.write(response.getOutputStream());
         workbook.close();
@@ -81,12 +75,8 @@ public class ExportController {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("考勤记录");
         
-        Row header = sheet.createRow(0);
-        header.createCell(0).setCellValue("学员姓名");
-        header.createCell(1).setCellValue("课程名称");
-        header.createCell(2).setCellValue("日期");
-        header.createCell(3).setCellValue("状态");
-        header.createCell(4).setCellValue("备注");
+        String[] headers = {"学员姓名", "课程名称", "日期", "状态", "备注"};
+        createHeader(sheet, headers);
         
         int rowNum = 1;
         for (AttendanceDTO dto : list) {
@@ -97,6 +87,8 @@ public class ExportController {
             row.createCell(3).setCellValue(dto.getStatus());
             row.createCell(4).setCellValue(dto.getNote());
         }
+        
+        autoSizeColumns(sheet, headers.length);
         
         setResponseHeader(response, "考勤记录.xlsx");
         workbook.write(response.getOutputStream());
@@ -111,14 +103,8 @@ public class ExportController {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("成绩记录");
         
-        Row header = sheet.createRow(0);
-        header.createCell(0).setCellValue("学员姓名");
-        header.createCell(1).setCellValue("课程名称");
-        header.createCell(2).setCellValue("成绩类型");
-        header.createCell(3).setCellValue("得分");
-        header.createCell(4).setCellValue("满分");
-        header.createCell(5).setCellValue("日期");
-        header.createCell(6).setCellValue("评语");
+        String[] headers = {"学员姓名", "课程名称", "成绩类型", "得分", "满分", "日期", "评语"};
+        createHeader(sheet, headers);
         
         int rowNum = 1;
         for (GradeDTO dto : list) {
@@ -132,9 +118,31 @@ public class ExportController {
             row.createCell(6).setCellValue(dto.getComment());
         }
         
+        autoSizeColumns(sheet, headers.length);
+        
         setResponseHeader(response, "成绩记录.xlsx");
         workbook.write(response.getOutputStream());
         workbook.close();
+    }
+
+    private void createHeader(Sheet sheet, String[] headers) {
+        Row headerRow = sheet.createRow(0);
+        org.apache.poi.ss.usermodel.CellStyle style = sheet.getWorkbook().createCellStyle();
+        org.apache.poi.ss.usermodel.Font font = sheet.getWorkbook().createFont();
+        font.setBold(true);
+        style.setFont(font);
+        
+        for (int i = 0; i < headers.length; i++) {
+            org.apache.poi.ss.usermodel.Cell cell = headerRow.createCell(i);
+            cell.setCellValue(headers[i]);
+            cell.setCellStyle(style);
+        }
+    }
+    
+    private void autoSizeColumns(Sheet sheet, int columnCount) {
+        for (int i = 0; i < columnCount; i++) {
+            sheet.autoSizeColumn(i);
+        }
     }
 
     private void setResponseHeader(HttpServletResponse response, String fileName) throws IOException {
