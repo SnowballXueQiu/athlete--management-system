@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sports.management.mapper.GradeMapper">
+
+    <select id="selectGradePage" resultType="com.sports.management.dto.GradeDTO">
+        SELECT g.*, s.name as studentName, c.name as courseName
+        FROM grades g
+        LEFT JOIN students s ON g.student_id = s.id
+        LEFT JOIN courses c ON g.course_id = c.id
+        <where>
+            <if test="studentId != null">
+                AND g.student_id = #{studentId}
+            </if>
+            <if test="courseId != null">
+                AND g.course_id = #{courseId}
+            </if>
+            <if test="gradeType != null and gradeType != ''">
+                AND g.grade_type LIKE CONCAT('%', #{gradeType}, '%')
+            </if>
+        </where>
+        ORDER BY g.grade_date DESC, g.created_at DESC
+    </select>
+
+</mapper>

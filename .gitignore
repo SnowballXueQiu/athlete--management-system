@@ -1,0 +1,29 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.swp
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+pnpm-debug.log*
+
+# Frontend
+src/frontend/dist/
+src/frontend/.vite/
+src/frontend/*.local
+
+# Backend
+src/backend/target/
+src/backend/*.log
+src/backend/help.md
+src/backend/.mvn/wrapper/maven-wrapper.properties
+
+# Local DB scripts
+*.sql

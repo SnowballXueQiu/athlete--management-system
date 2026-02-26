@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sports.management.mapper.AttendanceMapper">
+
+    <select id="selectAttendancePage" resultType="com.sports.management.dto.AttendanceDTO">
+        SELECT a.*, s.name as studentName, c.name as courseName
+        FROM attendance a
+        LEFT JOIN students s ON a.student_id = s.id
+        LEFT JOIN courses c ON a.course_id = c.id
+        <where>
+            <if test="studentId != null">
+                AND a.student_id = #{studentId}
+            </if>
+            <if test="courseId != null">
+                AND a.course_id = #{courseId}
+            </if>
+            <if test="date != null">
+                AND a.attendance_date = #{date}
+            </if>
+        </where>
+        ORDER BY a.attendance_date DESC, a.created_at DESC
+    </select>
+
+</mapper>

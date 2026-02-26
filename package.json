@@ -1,0 +1,14 @@
+{
+  "name": "sports-management-system",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently --kill-others --names \"be,fe\" --prefix-colors \"blue,green\" \"pnpm run dev:backend\" \"pnpm run dev:frontend\"",
+    "dev:backend": "cd src/backend && mvn spring-boot:run",
+    "dev:frontend": "cd src/frontend && pnpm dev",
+    "install:all": "pnpm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
