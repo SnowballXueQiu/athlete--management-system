@@ -52,7 +52,7 @@
               </el-icon>
             </div>
             <div class="stat-info">
-              <div class="stat-label">今日考勤</div>
+              <div class="stat-label">总考勤</div>
               <div class="stat-value">{{ summary.totalAttendance }}</div>
             </div>
           </div>
@@ -77,40 +77,63 @@
 
     <!-- Charts & Activity Section -->
     <el-row :gutter="20" class="charts-row">
-      <el-col :span="16">
+      <!-- Activity Bar Chart -->
+      <el-col :span="12">
         <el-card class="chart-card">
           <template #header>
             <div class="card-header">
               <span>本周训练活跃度</span>
             </div>
           </template>
-          <div class="chart-placeholder">
-            <!-- Simulated Bar Chart -->
-            <div class="bar-chart">
-              <div class="bar-group" v-for="(item, index) in weeklyActivity" :key="index">
-                <div class="bar-value" :style="{ bottom: (item.percent || 0) + '%' }">{{ item.value }}</div>
-                <div class="bar" :style="{ height: (item.percent || 0) + '%' }"></div>
-                <div class="label">{{ item.day }}</div>
-              </div>
-            </div>
-          </div>
+          <div ref="activityChartRef" style="height: 300px;"></div>
         </el-card>
       </el-col>
-      <el-col :span="8">
+
+      <!-- Pie Chart & Line Chart Section -->
+      <el-col :span="12">
+        <el-row :gutter="20">
+          <el-col :span="24" style="margin-bottom: 20px;">
+            <el-card class="chart-card">
+              <template #header>
+                <div class="card-header">
+                  <span>学员分布</span>
+                </div>
+              </template>
+              <div ref="distributionChartRef" style="height: 250px;"></div>
+            </el-card>
+          </el-col>
+          <el-col :span="24">
+            <el-card class="chart-card">
+              <template #header>
+                <div class="card-header">
+                  <span>成绩趋势 (近6个月)</span>
+                </div>
+              </template>
+              <div ref="gradeChartRef" style="height: 250px;"></div>
+            </el-card>
+          </el-col>
+        </el-row>
+      </el-col>
+    </el-row>
+
+    <!-- Quick Actions & Notices -->
+    <el-row :gutter="20" class="bottom-row" style="margin-top: 20px;">
+      <el-col :span="12">
         <el-card class="activity-card">
           <template #header>
             <div class="card-header">
               <span>快捷入口</span>
             </div>
           </template>
-          <div class="quick-actions">
+          <div class="quick-actions horizontal">
             <el-button type="primary" plain icon="Plus" @click="$router.push('/students')">添加学员</el-button>
             <el-button type="success" plain icon="Check" @click="$router.push('/attendance')">考勤打卡</el-button>
             <el-button type="warning" plain icon="DataLine" @click="$router.push('/statistics')">查看报表</el-button>
           </div>
         </el-card>
-
-        <el-card class="notice-card" style="margin-top: 20px;">
+      </el-col>
+      <el-col :span="12">
+        <el-card class="notice-card">
           <template #header>
             <div class="card-header">
               <span>系统公告</span>
@@ -141,10 +164,11 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '@/store/auth'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import request from '@/utils/request'
 import { User, Reading, Calendar, Trophy, Plus, Check, DataLine } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
+import * as echarts from 'echarts'
 
 const authStore = useAuthStore()
 const currentDate = ref(new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }))
@@ -158,25 +182,134 @@ const summary = ref({
   averageGrade: '0.0'
 })
 
-const weeklyActivity = ref<{ day: string, value: number, percent?: number }[]>([])
+// Chart Refs
+const activityChartRef = ref<HTMLElement | null>(null)
+const distributionChartRef = ref<HTMLElement | null>(null)
+const gradeChartRef = ref<HTMLElement | null>(null)
+
+// Chart Instances
+let activityChart: echarts.ECharts | null = null
+let distributionChart: echarts.ECharts | null = null
+let gradeChart: echarts.ECharts | null = null
+
+const initCharts = () => {
+  if (activityChartRef.value) activityChart = echarts.init(activityChartRef.value)
+  if (distributionChartRef.value) distributionChart = echarts.init(distributionChartRef.value)
+  if (gradeChartRef.value) gradeChart = echarts.init(gradeChartRef.value)
+}
+
+const updateCharts = (data: any) => {
+  // 1. Weekly Activity Chart (Bar)
+  if (activityChart && data.weeklyActivity) {
+    activityChart.setOption({
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' }
+      },
+      grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+      xAxis: {
+        type: 'category',
+        data: data.weeklyActivity.map((item: any) => item.day),
+        axisTick: { alignWithLabel: true }
+      },
+      yAxis: { type: 'value' },
+      series: [
+        {
+          name: '出勤人数',
+          type: 'bar',
+          barWidth: '60%',
+          data: data.weeklyActivity.map((item: any) => item.value),
+          itemStyle: { color: '#409EFF' }
+        }
+      ]
+    })
+  }
+
+  // 2. Student Distribution Chart (Pie)
+  if (distributionChart && data.studentDistribution) {
+    distributionChart.setOption({
+      tooltip: {
+        trigger: 'item',
+        formatter: '{a} <br/>{b}: {c} ({d}%)'
+      },
+      legend: {
+        orient: 'vertical',
+        left: 'left'
+      },
+      series: [
+        {
+          name: '学员分布',
+          type: 'pie',
+          radius: ['50%', '70%'],
+          avoidLabelOverlap: false,
+          itemStyle: {
+            borderRadius: 10,
+            borderColor: '#fff',
+            borderWidth: 2
+          },
+          label: {
+            show: false,
+            position: 'center'
+          },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: 20,
+              fontWeight: 'bold'
+            }
+          },
+          labelLine: { show: false },
+          data: data.studentDistribution.map((item: any) => ({
+            value: item.count,
+            name: item.name
+          }))
+        }
+      ]
+    })
+  }
+
+  // 3. Grade Trend Chart (Line)
+  if (gradeChart && data.gradeTrend) {
+    gradeChart.setOption({
+      tooltip: {
+        trigger: 'axis'
+      },
+      grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+      xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        data: data.gradeTrend.map((item: any) => item.month)
+      },
+      yAxis: {
+        type: 'value',
+        min: (value: any) => Math.floor(value.min - 5),
+        max: 100
+      },
+      series: [
+        {
+          name: '平均成绩',
+          type: 'line',
+          data: data.gradeTrend.map((item: any) => item.avgScore),
+          smooth: true,
+          itemStyle: { color: '#67C23A' },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(103, 194, 58, 0.5)' },
+              { offset: 1, color: 'rgba(103, 194, 58, 0.1)' }
+            ])
+          }
+        }
+      ]
+    })
+  }
+}
 
 const fetchSummary = async () => {
   try {
-    // Reuse existing statistics API
     const res = await request.get('/statistics/summary')
     if (res.data) {
       summary.value = res.data
-
-      if (res.data.weeklyActivity && Array.isArray(res.data.weeklyActivity)) {
-        const activities = res.data.weeklyActivity
-        const max = Math.max(...activities.map((item: any) => item.value), 10) // Minimum scale 10
-
-        weeklyActivity.value = activities.map((item: any) => ({
-          day: item.day,
-          value: item.value,
-          percent: (item.value / max) * 100
-        }))
-      }
+      updateCharts(res.data)
     }
   } catch (error) {
     console.error('Failed to fetch summary:', error)
@@ -191,8 +324,23 @@ const showNotice = (title: string, content: string) => {
   })
 }
 
+const handleResize = () => {
+  activityChart?.resize()
+  distributionChart?.resize()
+  gradeChart?.resize()
+}
+
 onMounted(() => {
+  initCharts()
   fetchSummary()
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+  activityChart?.dispose()
+  distributionChart?.dispose()
+  gradeChart?.dispose()
 })
 </script>
 
@@ -298,55 +446,19 @@ onMounted(() => {
   height: 100%;
 }
 
-.bar-chart {
-  display: flex;
-  justify-content: space-around;
-  align-items: flex-end;
-  height: 300px;
-  padding-top: 20px;
-}
-
-.bar-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 40px;
-  height: 100%;
-  justify-content: flex-end;
-  position: relative;
-}
-
-.bar-value {
-  position: absolute;
-  margin-bottom: 5px;
-  font-size: 12px;
-  color: #606266;
-  font-weight: bold;
-  transition: bottom 0.5s ease;
-}
-
-.bar {
-  width: 100%;
-  background: #409EFF;
-  border-radius: 4px 4px 0 0;
-  transition: height 0.5s ease;
-}
-
-.label {
-  margin-top: 10px;
-  color: #606266;
-  font-size: 12px;
-}
-
 .quick-actions {
   display: flex;
-  flex-direction: column;
   gap: 10px;
+}
+
+.quick-actions.horizontal {
+  flex-direction: row;
+  justify-content: space-around;
 }
 
 .quick-actions .el-button {
   margin-left: 0;
-  justify-content: flex-start;
+  flex: 1;
 }
 
 .notice-list {

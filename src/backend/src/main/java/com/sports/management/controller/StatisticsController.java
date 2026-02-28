@@ -90,6 +90,14 @@ public class StatisticsController {
         
         data.put("weeklyActivity", weeklyActivity);
         
+        // Student Distribution (Course Enrollment)
+        List<Map<String, Object>> distribution = courseMapper.selectStudentDistribution();
+        data.put("studentDistribution", distribution);
+        
+        // Grade Trend (Last 6 months)
+        List<Map<String, Object>> gradeTrend = gradeMapper.selectMonthlyAverageGrade();
+        data.put("gradeTrend", gradeTrend);
+        
         return ResponseEntity.ok(data);
     }
 }
