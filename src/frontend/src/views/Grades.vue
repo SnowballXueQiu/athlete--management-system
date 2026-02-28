@@ -6,7 +6,7 @@
       </el-select>
       <el-input v-model="searchGradeType" placeholder="成绩类型(如:期末测试)" style="width: 200px" clearable @clear="fetchGrades" @keyup.enter="fetchGrades" />
       <el-button type="primary" @click="fetchGrades">搜索</el-button>
-      <el-button type="success" @click="handleAdd">录入成绩</el-button>
+      <el-button type="success" @click="handleAdd" v-if="['admin', 'coach'].includes(authStore.user.role)">录入成绩</el-button>
     </div>
 
     <el-table :data="gradeList" style="width: 100%" v-loading="loading">
@@ -18,7 +18,7 @@
       <el-table-column prop="maxScore" label="满分" width="100" />
       <el-table-column prop="gradeDate" label="日期" width="120" />
       <el-table-column prop="comment" label="评语" show-overflow-tooltip />
-      <el-table-column label="操作" width="120">
+      <el-table-column label="操作" width="120" v-if="['admin', 'coach'].includes(authStore.user.role)">
         <template #default="scope">
           <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
         </template>
@@ -80,7 +80,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import request from '@/utils/request'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useAuthStore } from '@/store/auth'
 
+const authStore = useAuthStore()
 const gradeList = ref([])
 const courseList = ref<any[]>([])
 const studentList = ref<any[]>([])

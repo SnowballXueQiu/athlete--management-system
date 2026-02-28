@@ -47,7 +47,7 @@
       </el-col>
     </el-row>
     
-    <div class="export-section">
+    <div class="export-section" v-if="['admin', 'staff'].includes(authStore.user.role)">
       <h3>数据导出</h3>
       <div class="export-buttons">
         <el-button type="primary" size="large" @click="handleExport('students')">导出学员信息</el-button>
@@ -62,7 +62,9 @@
 import { ref, onMounted } from 'vue'
 import request from '@/utils/request'
 import { ElMessage } from 'element-plus'
+import { useAuthStore } from '@/store/auth'
 
+const authStore = useAuthStore()
 const summary = ref({
   totalStudents: 0,
   totalCourses: 0,

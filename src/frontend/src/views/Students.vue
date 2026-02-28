@@ -5,7 +5,7 @@
         @keyup.enter="fetchStudents" />
       <el-button type="primary" @click="fetchStudents">搜索</el-button>
       <el-button @click="handleReset">重置</el-button>
-      <el-button type="success" @click="handleAdd">添加学员</el-button>
+      <el-button type="success" @click="handleAdd" v-if="['admin', 'staff'].includes(authStore.user.role)">添加学员</el-button>
     </div>
 
     <el-table :data="students" style="width: 100%" v-loading="loading" @sort-change="handleSortChange">
@@ -16,7 +16,7 @@
       <el-table-column prop="phone" label="电话" width="120" show-overflow-tooltip align="center" />
       <el-table-column prop="email" label="邮箱" width="180" show-overflow-tooltip align="center" />
       <el-table-column prop="address" label="地址" show-overflow-tooltip align="center" />
-      <el-table-column label="操作" width="180" align="center" fixed="right">
+      <el-table-column label="操作" width="180" align="center" fixed="right" v-if="['admin', 'staff'].includes(authStore.user.role)">
         <template #default="scope">
           <el-button size="small" @click="handleEdit(scope.row)">编辑</el-button>
           <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
@@ -75,7 +75,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import request from '@/utils/request'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useAuthStore } from '@/store/auth'
 
+const authStore = useAuthStore()
 const students = ref([])
 const loading = ref(false)
 const searchName = ref('')

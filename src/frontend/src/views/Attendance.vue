@@ -6,7 +6,7 @@
       </el-select>
       <el-date-picker v-model="searchDate" type="date" placeholder="选择日期" value-format="YYYY-MM-DD" @change="fetchAttendance" style="width: 200px" />
       <el-button type="primary" @click="fetchAttendance">搜索</el-button>
-      <el-button type="success" @click="handleAdd">录入考勤</el-button>
+      <el-button type="success" @click="handleAdd" v-if="['admin', 'coach'].includes(authStore.user.role)">录入考勤</el-button>
     </div>
 
     <el-table :data="attendanceList" style="width: 100%" v-loading="loading">
@@ -20,7 +20,7 @@
         </template>
       </el-table-column>
       <el-table-column prop="note" label="备注" />
-      <el-table-column label="操作" width="120">
+      <el-table-column label="操作" width="120" v-if="['admin', 'coach'].includes(authStore.user.role)">
         <template #default="scope">
           <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
         </template>
@@ -81,7 +81,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import request from '@/utils/request'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useAuthStore } from '@/store/auth'
 
+const authStore = useAuthStore()
 const attendanceList = ref([])
 const courseList = ref<any[]>([])
 const studentList = ref<any[]>([])

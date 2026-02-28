@@ -3,7 +3,7 @@
     <div class="header">
       <el-input v-model="searchName" placeholder="搜索课程名称" style="width: 200px" clearable @clear="fetchCourses" @keyup.enter="fetchCourses" />
       <el-button type="primary" @click="fetchCourses">搜索</el-button>
-      <el-button type="success" @click="handleAdd">添加课程</el-button>
+      <el-button type="success" @click="handleAdd" v-if="['admin', 'staff'].includes(authStore.user.role)">添加课程</el-button>
     </div>
 
     <el-table :data="courses" style="width: 100%" v-loading="loading">
@@ -24,7 +24,7 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="180">
+      <el-table-column label="操作" width="180" v-if="['admin', 'staff'].includes(authStore.user.role)">
         <template #default="scope">
           <el-button size="small" @click="handleEdit(scope.row)">编辑</el-button>
           <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
@@ -97,7 +97,9 @@
 import { ref, reactive, onMounted, watch } from 'vue'
 import request from '@/utils/request'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useAuthStore } from '@/store/auth'
 
+const authStore = useAuthStore()
 const courses = ref([])
 const loading = ref(false)
 const searchName = ref('')

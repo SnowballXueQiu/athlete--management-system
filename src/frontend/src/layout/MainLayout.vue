@@ -13,31 +13,37 @@
             </el-icon>
             <span>首页</span>
           </el-menu-item>
-          <el-menu-item index="/students">
+          <el-menu-item index="/users" v-if="['admin'].includes(authStore.user.role)">
+            <el-icon>
+              <Avatar />
+            </el-icon>
+            <span>员工管理</span>
+          </el-menu-item>
+          <el-menu-item index="/students" v-if="['admin', 'coach', 'staff'].includes(authStore.user.role)">
             <el-icon>
               <User />
             </el-icon>
             <span>学员管理</span>
           </el-menu-item>
-          <el-menu-item index="/courses">
+          <el-menu-item index="/courses" v-if="['admin', 'coach', 'staff'].includes(authStore.user.role)">
             <el-icon>
               <Reading />
             </el-icon>
             <span>课程管理</span>
           </el-menu-item>
-          <el-menu-item index="/attendance">
+          <el-menu-item index="/attendance" v-if="['admin', 'coach', 'staff'].includes(authStore.user.role)">
             <el-icon>
               <Calendar />
             </el-icon>
             <span>考勤管理</span>
           </el-menu-item>
-          <el-menu-item index="/grades">
+          <el-menu-item index="/grades" v-if="['admin', 'coach', 'staff'].includes(authStore.user.role)">
             <el-icon>
               <Trophy />
             </el-icon>
             <span>成绩管理</span>
           </el-menu-item>
-          <el-menu-item index="/statistics">
+          <el-menu-item index="/statistics" v-if="['admin', 'coach', 'staff'].includes(authStore.user.role)">
             <el-icon>
               <PieChart />
             </el-icon>
@@ -82,7 +88,7 @@
 import { computed } from 'vue'
 import { useAuthStore } from '@/store/auth'
 import { useRouter, useRoute } from 'vue-router'
-import { DataBoard, User, Reading, Calendar, Trophy, PieChart, ArrowDown } from '@element-plus/icons-vue'
+import { DataBoard, User, Reading, Calendar, Trophy, PieChart, ArrowDown, Avatar } from '@element-plus/icons-vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
