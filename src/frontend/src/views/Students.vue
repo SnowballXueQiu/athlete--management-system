@@ -32,22 +32,34 @@
 
     <!-- Dialog for Add/Edit -->
     <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑学员' : '添加学员'" width="500px">
-      <el-form :model="form" label-width="80px">
-        <el-form-item label="姓名">
-          <el-input v-model="form.name" />
-        </el-form-item>
-        <el-form-item label="性别">
-          <el-select v-model="form.gender" placeholder="请选择">
-            <el-option label="男" value="男" />
-            <el-option label="女" value="女" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="年龄">
-          <el-input-number v-model="form.age" :min="1" />
-        </el-form-item>
-        <el-form-item label="电话">
-          <el-input v-model="form.phone" />
-        </el-form-item>
+      <el-form :model="form" label-width="100px">
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="姓名">
+              <el-input v-model="form.name" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="性别">
+              <el-select v-model="form.gender" placeholder="请选择" style="width: 100%;">
+                <el-option label="男" value="男" />
+                <el-option label="女" value="女" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="年龄">
+              <el-input-number v-model="form.age" :min="1" style="width: 100%;" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="电话">
+              <el-input v-model="form.phone" />
+            </el-form-item>
+          </el-col>
+        </el-row>
         <el-form-item label="邮箱">
           <el-input v-model="form.email" />
         </el-form-item>
